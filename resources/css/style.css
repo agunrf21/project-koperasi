@@ -1,0 +1,21 @@
+/* Warna Tema */
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+}
+
+.card-item {
+    transition: transform 0.3s;
+    border: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.card-item:hover {
+    transform: translateY(-5px);
+}
+
+.btn-koperasi {
+    background-color: var(--secondary-color);
+    color: white !important;
+    border: none;
+}

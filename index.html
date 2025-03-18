@@ -1,0 +1,93 @@
+<?php
+// Mulai session untuk manajemen keranjang
+session_start();
+// Include koneksi database dan header
+include 'includes/koneksi.php';
+include 'includes/header.php';
+?>
+
+    <div class="container mt-5">
+        <h2 class="mb-4 text-center">📦 Daftar Barang Koperasi</h2>
+
+        <!-- Notifikasi Sukses -->
+        <?php if(isset($_GET['status']) && $_GET['status'] == 'sukses'): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            Item berhasil ditambahkan ke keranjang!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <?php endif; ?>
+
+        <div class="row g-4">
+            <?php
+        // Query untuk mengambil data item
+        $query = "SELECT * FROM item";
+        $result = mysqli_query($koneksi, $query);
+        
+        // Cek apakah ada data
+        if(mysqli_num_rows($result) > 0) {
+            while($row = mysqli_fetch_assoc($result)) {
+        ?>
+                <div class="col-md-4 col-lg-3">
+                    <div class="card h-100 shadow-sm card-item">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">
+                                <?= htmlspecialchars($row['nama_item']) ?>
+                            </h5>
+                            <div class="mb-3">
+                                <span class="badge bg-secondary"><?= htmlspecialchars($row['uom']) ?></span>
+                            </div>
+                            <p class="text-muted">Harga Beli: Rp
+                                <?= number_format($row['harga_beli'], 0, ',', '.') ?>
+                            </p>
+                            <p class="fw-bold text-success">Harga Jual: Rp
+                                <?= number_format($row['harga_jual'], 0, ',', '.') ?>
+                            </p>
+                            <button class="btn btn-koperasi w-100" onclick="tambahKeranjang(<?= $row['id_item'] ?>)">
+                        <i class="bi bi-cart-plus"></i> Tambah Ke Keranjang
+                    </button>
+                        </div>
+                    </div>
+                </div>
+                <?php
+            }
+        } else {
+            echo '<div class="col-12"><div class="alert alert-warning">Tidak ada barang tersedia.</div></div>';
+        }
+        ?>
+        </div>
+    </div>
+
+    <!-- JavaScript untuk AJAX -->
+    <script>
+        function tambahKeranjang(idItem) {
+            fetch(`tambah_keranjang.php?id_item=${idItem}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Tampilkan notifikasi
+                        const alert = document.createElement('div');
+                        alert.className = 'alert alert-success alert-dismissible fade show';
+                        alert.innerHTML = `
+                    Item berhasil ditambahkan! 
+                    <a href="keranjang.php" class="alert-link">Lihat Keranjang</a>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                        document.querySelector('.container').prepend(alert);
+
+                        // Animasi tambah ke keranjang
+                        const btn = event.target;
+                        btn.innerHTML = '<i class="bi bi-check2"></i> Ditambahkan!';
+                        btn.classList.add('disabled');
+                        setTimeout(() => {
+                            btn.innerHTML = '<i class="bi bi-cart-plus"></i> Tambah Ke Keranjang';
+                            btn.classList.remove('disabled');
+                        }, 1500);
+                    }
+                });
+        }
+    </script>
+
+    <?php
+// Include footer
+include 'includes/footer.php';
+?>
